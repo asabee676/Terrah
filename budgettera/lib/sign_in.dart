@@ -1,11 +1,17 @@
 import 'package:budgettera/forget.dart';
-import 'package:budgettera/navigat.dart';
+import 'package:budgettera/home.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-final _formkey = GlobalKey<FormState>();
+// FORM KEY
+final _formKey = GlobalKey<FormState>();
 
 class SignIn extends StatelessWidget {
-  const SignIn({super.key});
+  SignIn({super.key});
+
+  // CONTROLLERS
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +28,7 @@ class SignIn extends StatelessWidget {
 
               // TITLE
               const Text(
-                "Welcom Back",
+                "Welcome Back",
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
@@ -32,27 +38,78 @@ class SignIn extends StatelessWidget {
 
               const SizedBox(height: 30),
 
-              Padding(
-                padding: EdgeInsets.all(8),
+              // ========================
+              // LOGIN FORM
+              // ========================
+              Form(
+                key: _formKey,
                 child: Column(
-                  key: _formkey,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Text("Enter your email"), TextFormField(decoration: InputDecoration(),)],
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Enter your email"),
+                    const SizedBox(height: 8),
+
+                    // EMAIL INPUT
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        hintText: "Email",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Email is required";
+                        }
+                        bool valid = RegExp(r'^[^@]+@[^@]+\.[^@]+$')
+                            .hasMatch(value);
+                        if (!valid) return "Enter a valid email";
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    const Text("Enter your password"),
+                    const SizedBox(height: 8),
+
+                    // PASSWORD INPUT
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: "Password",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Password is required";
+                        }
+                        if (value.length < 6) {
+                          return "Password must be at least 6 characters";
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
                 ),
               ),
 
               const SizedBox(height: 10),
 
-              // ---------------------------
               // FORGOT PASSWORD BUTTON
-              // ---------------------------
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => ForgotPasswordScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => ForgotPasswordScreen(),
+                      ),
                     );
                   },
                   child: const Text(
@@ -67,23 +124,47 @@ class SignIn extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              // login BUTTON
-              Container(
-                height: 55,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0135C5),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Center(
-                  child: GestureDetector(
-                    onTap: () {
+              // ========================
+              // LOGIN BUTTON
+              // ========================
+              GestureDetector(
+                onTap: () async {
+                  if (_formKey.currentState!.validate()) {
+                    final supabase = Supabase.instance.client;
+
+                    final email = _emailController.text.trim();
+                    final password = _passwordController.text.trim();
+
+                    try {
+                      // LOGIN
+                      await supabase.auth.signInWithPassword(
+                        email: email,
+                        password: password,
+                      );
+
+                      // SUCCESS → GO TO HOME PAGE
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Navigat()),
+                        MaterialPageRoute(builder: (_) => Home(userName: '',)),
                       );
-                    },
-                    child: const Text(
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Login failed: ${e.toString()}"),
+                        ),
+                      );
+                    }
+                  }
+                },
+                child: Container(
+                  height: 55,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0135C5),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Center(
+                    child: Text(
                       "Login",
                       style: TextStyle(
                         color: Colors.white,
@@ -97,16 +178,12 @@ class SignIn extends StatelessWidget {
 
               const SizedBox(height: 25),
 
-              // OR DIVIDER
               Row(
                 children: [
                   Expanded(child: Divider(color: Colors.grey.shade300)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: const Text(
-                      "Or",
-                      style: TextStyle(color: Colors.grey),
-                    ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: Text("Or", style: TextStyle(color: Colors.grey)),
                   ),
                   Expanded(child: Divider(color: Colors.grey.shade300)),
                 ],
@@ -119,13 +196,14 @@ class SignIn extends StatelessWidget {
                 height: 55,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade400, width: 1),
+                  border: Border.all(color: Colors.grey.shade400),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.network(
-                      "https://tse1.mm.bing.net/th/id/OIP.s_lj-NXGdEy_2Z6LHiXWfgHaHk?rs=1&pid=ImgDetMain&o=7&rm=3",
+                      "https://tse1.mm.bing.net/th/id/OIP.s_lj-NXGdEy_2Z6LHiXWfgHaHk",
+                      height: 30,
                     ),
                     const SizedBox(width: 10),
                     const Text(
@@ -144,21 +222,6 @@ class SignIn extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  // INPUT FIELD WIDGET
-  Widget _inputField(String hint, {bool isPassword = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F6FA),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: TextField(
-        obscureText: isPassword,
-        decoration: InputDecoration(hintText: hint, border: InputBorder.none),
       ),
     );
   }

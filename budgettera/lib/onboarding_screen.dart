@@ -196,7 +196,9 @@ class _OnboardingState extends State<Onboarding> {
                   begin: Alignment.bottomCenter,
                   end: Alignment.center,
                   colors: [
+                    // ignore: deprecated_member_use
                     Colors.blue.withOpacity(0.95),
+                    // ignore: deprecated_member_use
                     Colors.blue.withOpacity(0.5),
                     Colors.transparent,
                   ],

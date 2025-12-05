@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class CustomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTabSelected;
-
+  
   const CustomNavBar({
     super.key,
     required this.currentIndex,

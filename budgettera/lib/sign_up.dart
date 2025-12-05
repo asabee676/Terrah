@@ -1,94 +1,144 @@
 import 'package:budgettera/sign_in.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignUp extends StatelessWidget {
-  const SignUp({super.key});
+  SignUp({super.key});
 
-  Route<Object?>? get login => null;
+  // TEXT CONTROLLERS
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Center(child: Text("BUDGETTERA"))),
+      appBar: AppBar(title: const Center(child: Text("BUDGETTERA"))),
       backgroundColor: Colors.white,
 
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-              // TITLE
               Text(
                 "Sign up now to begin\nyour journey!",
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
-                  color: const Color.fromARGB(221, 93, 128, 224),
+                  color: Color.fromARGB(221, 93, 128, 224),
                 ),
               ),
 
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
 
               // USERNAME
-              _inputField("UserName"),
+              _inputField("UserName", controller: _usernameController),
 
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
 
               // EMAIL
-              _inputField("Email"),
+              _inputField("Email", controller: _emailController),
 
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
 
               // PASSWORD
-              _inputField("Password", isPassword: true),
+              _inputField(
+                "Password",
+                controller: _passwordController,
+                isPassword: true,
+              ),
 
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
 
               // CONFIRM PASSWORD
-              _inputField("Confirm Password", isPassword: true),
+              _inputField(
+                "Confirm Password",
+                controller: _confirmController,
+                isPassword: true,
+              ),
 
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
 
               // REGISTER BUTTON
-              Container(
-                height: 55,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Color(0xFF0135C5),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Center(
-                  child: Text(
-                    "Register",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
+              GestureDetector(
+                onTap: () async {
+                  final supabase = Supabase.instance.client;
+
+                  final email = _emailController.text.trim();
+                  final password = _passwordController.text.trim();
+                  final confirm = _confirmController.text.trim();
+
+                  if (password != confirm) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Passwords do not match")),
+                    );
+                    return;
+                  }
+
+                  try {
+                    final response = await supabase.auth.signUp(
+                      email: email,
+                      password: password,
+                    );
+
+                    if (response.user != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Account created! Check your email."),
+                        ),
+                      );
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => SignIn()),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Signup failed: $e")),
+                    );
+                  }
+                },
+                child: Container(
+                  height: 55,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0135C5),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "Register",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),
               ),
 
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
 
-              // OR DIVIDER
               Row(
                 children: [
                   Expanded(child: Divider(color: Colors.grey.shade300)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
                     child: Text("Or", style: TextStyle(color: Colors.grey)),
                   ),
                   Expanded(child: Divider(color: Colors.grey.shade300)),
                 ],
               ),
 
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
 
-              // GOOGLE BUTTON
               Container(
                 height: 55,
                 decoration: BoxDecoration(
@@ -99,10 +149,11 @@ class SignUp extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.network(
-                      "https://tse1.mm.bing.net/th/id/OIP.s_lj-NXGdEy_2Z6LHiXWfgHaHk?rs=1&pid=ImgDetMain&o=7&rm=3",
+                      "https://tse1.mm.bing.net/th/id/OIP.s_lj-NXGdEy_2Z6LHiXWfgHaHk",
+                      height: 24,
                     ),
-                    SizedBox(width: 10),
-                    Text(
+                    const SizedBox(width: 10),
+                    const Text(
                       "Continue with Google",
                       style: TextStyle(
                         fontSize: 16,
@@ -114,21 +165,20 @@ class SignUp extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-              // ALREADY HAVE ACCOUNT TEXT
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Already have an account? "),
+                  const Text("Already have an account? "),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => SignIn()),
+                        MaterialPageRoute(builder: (_) => SignIn()),
                       );
                     },
-                    child: Text(
+                    child: const Text(
                       "Login",
                       style: TextStyle(
                         color: Colors.blue,
@@ -139,7 +189,7 @@ class SignUp extends StatelessWidget {
                 ],
               ),
 
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -147,15 +197,20 @@ class SignUp extends StatelessWidget {
     );
   }
 
-  // INPUT FIELD WIDGET
-  Widget _inputField(String hint, {bool isPassword = false}) {
+  // INPUT FIELD
+  Widget _inputField(
+    String hint, {
+    bool isPassword = false,
+    required TextEditingController controller,
+  }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: Color(0xFFF3F6FA),
+        color: const Color(0xFFF3F6FA),
         borderRadius: BorderRadius.circular(20),
       ),
       child: TextField(
+        controller: controller,
         obscureText: isPassword,
         decoration: InputDecoration(hintText: hint, border: InputBorder.none),
       ),
