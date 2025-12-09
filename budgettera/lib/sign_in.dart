@@ -1,5 +1,6 @@
 import 'package:budgettera/forget.dart';
 import 'package:budgettera/home.dart';
+import 'package:budgettera/navigat.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -62,8 +63,9 @@ class SignIn extends StatelessWidget {
                         if (value == null || value.isEmpty) {
                           return "Email is required";
                         }
-                        bool valid = RegExp(r'^[^@]+@[^@]+\.[^@]+$')
-                            .hasMatch(value);
+                        bool valid = RegExp(
+                          r'^[^@]+@[^@]+\.[^@]+$',
+                        ).hasMatch(value);
                         if (!valid) return "Enter a valid email";
                         return null;
                       },
@@ -107,9 +109,7 @@ class SignIn extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => ForgotPasswordScreen(),
-                      ),
+                      MaterialPageRoute(builder: (_) => ForgotPasswordScreen()),
                     );
                   },
                   child: const Text(
@@ -145,7 +145,7 @@ class SignIn extends StatelessWidget {
                       // SUCCESS → GO TO HOME PAGE
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => Home(userName: '',)),
+                        MaterialPageRoute(builder: (_) => Navigat()),
                       );
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
