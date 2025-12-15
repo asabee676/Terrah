@@ -7,239 +7,395 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Theme colors
-    const blue = Color(0xFF0066FF);
-    const lightBlue = Color(0xFFE8F5F7);
-    const green = Color(0xFF3CC173);
-    const red = Color(0xFFFF4D4D);
-    const orange = Color(0xFFFFA726);
+    const primaryBlue = Color(0xFF0A6CFF);
+    const cardBlue = Color(0xFFEAF1FF);
+    const successGreen = Color(0xFF3CC173);
+    const failRed = Color(0xFFFF4D4D);
 
     return Scaffold(
-      backgroundColor: lightBlue,
-      appBar: AppBar(
-        backgroundColor: blue,
-        elevation: 0,
-        title: Text(
-          'Hello, $userName!',
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: false,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Balance Card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: blue,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Balance',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    '₵12,345.67',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  LinearProgressIndicator(
-                    value: 0.7,
-                    color: green,
-                    backgroundColor: Colors.white24,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Quick Actions
-            const Text(
-              'Quick Actions',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _quickAction(icon: Icons.send, label: 'Send', color: blue),
-                _quickAction(
-                  icon: Icons.request_page,
-                  label: 'Request',
-                  color: green,
+      backgroundColor: const Color(0xFFF5F8FF),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              //----------------------------------------------------------------
+              //  🔵 BLUE TOP SECTION (NO CURVED BOTTOM)
+              //----------------------------------------------------------------
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 18,
                 ),
-                _quickAction(
-                  icon: Icons.account_balance_wallet,
-                  label: 'Wallet',
-                  color: orange,
-                ),
-                _quickAction(icon: Icons.more_horiz, label: 'More', color: red),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Remittance Overview Table
-            const Text(
-              'Remittance Overview',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Table(
-              border: TableBorder.all(color: Colors.grey.shade300),
-              children: const [
-                TableRow(
-                  decoration: BoxDecoration(color: Colors.white),
+                color: primaryBlue,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        'Date',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                    //--------------------------------------------------------------
+                    // GREETING + NOTIFICATION
+                    //--------------------------------------------------------------
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Hi, Welcome Back",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "Good morning",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.notifications, color: primaryBlue),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    //--------------------------------------------------------------
+                    // MAIN CARD — Stays FULLY inside Blue background
+                    //--------------------------------------------------------------
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(22),
+                      decoration: BoxDecoration(
+                        color: cardBlue,
+                        borderRadius: BorderRadius.circular(22),
+                        boxShadow: [
+                          BoxShadow(
+                            // ignore: deprecated_member_use
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          //----------------------------------------------------------
+                          // NAME + ARROW
+                          //----------------------------------------------------------
+                          Row(
+                            children: [
+                              Text(
+                                userName,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              const Icon(Icons.keyboard_arrow_down),
+                            ],
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          //----------------------------------------------------------
+                          // TAGS
+                          //----------------------------------------------------------
+                          Row(
+                            children: [
+                              _tag("budget"),
+                              const SizedBox(width: 6),
+                              _tag("remittance"),
+                              const SizedBox(width: 6),
+                              _tag("#37473958"),
+                            ],
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          //----------------------------------------------------------
+                          // BALANCE + EXPENSE
+                          //----------------------------------------------------------
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.savings,
+                                        color: successGreen,
+                                        size: 16,
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text("Total Balance"),
+                                    ],
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    "GHS 2000.00",
+                                    style: TextStyle(
+                                      color: primaryBlue,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.money_off,
+                                        color: failRed,
+                                        size: 16,
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text("Total Expense"),
+                                    ],
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    "GHS 1,187.40",
+                                    style: TextStyle(
+                                      color: failRed,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          //----------------------------------------------------------
+                          // PROGRESS BAR
+                          //----------------------------------------------------------
+                          const Text(
+                            "Budget Spent : 30%",
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 6),
+
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: const LinearProgressIndicator(
+                              value: 0.30,
+                              minHeight: 10,
+                              color: successGreen,
+                              backgroundColor: Colors.white,
+                            ),
+                          ),
+
+                          const SizedBox(height: 6),
+
+                          const Text(
+                            "30% Of Your Expenses—Looks Great!",
+                            style: TextStyle(
+                              color: successGreen,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+
+                          const SizedBox(height: 25),
+
+                          //----------------------------------------------------------
+                          // Action Buttons
+                          //----------------------------------------------------------
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: const [
+                              _actionButton(
+                                icon: Icons.account_balance_wallet,
+                                text: "Deposit",
+                              ),
+                              _actionButton(
+                                icon: Icons.outbond,
+                                text: "Withdraw",
+                              ),
+                              _actionButton(
+                                icon: Icons.send,
+                                text: "Send Money",
+                              ),
+                              _actionButton(
+                                icon: Icons.receipt,
+                                text: "Pay Bills",
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        'Amount',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        'Status',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('30 Nov'),
-                    ),
-                    Padding(padding: EdgeInsets.all(8.0), child: Text('₵500')),
-                    Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('Completed', style: TextStyle(color: green)),
-                    ),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('29 Nov'),
-                    ),
-                    Padding(padding: EdgeInsets.all(8.0), child: Text('₵200')),
-                    Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('Pending', style: TextStyle(color: orange)),
-                    ),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('28 Nov'),
-                    ),
-                    Padding(padding: EdgeInsets.all(8.0), child: Text('₵100')),
-                    Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('Failed', style: TextStyle(color: red)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
 
-            // Budget Overview
-            const Text(
-              'Budget Overview',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
-              child: Column(
-                children: const [
-                  _budgetItem(title: 'Food', progress: 0.6, color: blue),
-                  SizedBox(height: 10),
-                  _budgetItem(title: 'Transport', progress: 0.4, color: green),
-                  SizedBox(height: 10),
-                  _budgetItem(title: 'Shopping', progress: 0.8, color: red),
-                ],
+
+              //----------------------------------------------------------------
+              //  ⚪ WHITE SECTION WITH CURVED TOP
+              //----------------------------------------------------------------
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(40),
+                    topRight: Radius.circular(40),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    //--------------------------------------------------------------
+                    // ROW: Remittance Text + Show All
+                    //--------------------------------------------------------------
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text(
+                          "Remittance Overview",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text("Show all", style: TextStyle(color: primaryBlue)),
+                      ],
+                    ),
+
+                    const SizedBox(height: 10),
+                    _remittanceTable(),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  // Quick Action Widget
-  Widget _quickAction({
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
+// ============================================================================
+// TAG CHIP
+// ============================================================================
+Widget _tag(String text) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: Colors.grey.shade300),
+    ),
+    child: Text(
+      text,
+      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+    ),
+  );
+}
+
+// ============================================================================
+// ACTION BUTTON
+// ============================================================================
+class _actionButton extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _actionButton({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         CircleAvatar(
-          radius: 25,
-          backgroundColor: color,
-          child: Icon(icon, color: Colors.white),
+          radius: 28,
+          backgroundColor: const Color(0xFFDDE9FF),
+          child: Icon(icon, color: Color(0xFF0A6CFF), size: 28),
         ),
         const SizedBox(height: 5),
-        Text(label),
+        SizedBox(
+          width: 70,
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 11),
+          ),
+        ),
       ],
     );
   }
 }
 
-// Budget Item Widget
-class _budgetItem extends StatelessWidget {
-  final String title;
-  final double progress;
-  final Color color;
+// ============================================================================
+// REMITTANCE TABLE
+// ============================================================================
+Widget _remittanceTable() {
+  return Column(
+    children: [
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0A6CFF),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Text("Date", style: TextStyle(color: Colors.white)),
+            Text("Amount", style: TextStyle(color: Colors.white)),
+            Text("Recipient", style: TextStyle(color: Colors.white)),
+            Text("Status", style: TextStyle(color: Colors.white)),
+          ],
+        ),
+      ),
 
-  const _budgetItem({
-    required this.title,
-    required this.progress,
-    required this.color,
-  });
+      const SizedBox(height: 8),
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      _row(
+        "25/11/2024",
+        "GHS 500.00",
+        "John smith",
+        "successful",
+        Colors.green,
+      ),
+      _row("26/11/2024", "GHS 100.02", "Nana Kofi", "failed", Colors.red),
+      _row("27/11/2024", "GHS 300.57", "Mike Adams", "pending", Colors.orange),
+    ],
+  );
+}
+
+Widget _row(String date, String amount, String rec, String status, Color col) {
+  return Container(
+    padding: const EdgeInsets.symmetric(vertical: 12),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 5),
-        LinearProgressIndicator(
-          value: progress,
-          color: color,
-          backgroundColor: Colors.grey.shade200,
+        Text(date),
+        Text(amount),
+        Text(rec),
+        Text(
+          status,
+          style: TextStyle(color: col, fontWeight: FontWeight.w600),
         ),
       ],
-    );
-  }
+    ),
+  );
 }

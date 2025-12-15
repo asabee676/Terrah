@@ -1,5 +1,4 @@
 import 'package:budgettera/forget.dart';
-import 'package:budgettera/home.dart';
 import 'package:budgettera/navigat.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

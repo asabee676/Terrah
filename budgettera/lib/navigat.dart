@@ -1,3 +1,4 @@
+import 'package:budgettera/budget_screen.dart';
 import 'package:budgettera/home.dart';
 import 'package:flutter/material.dart';
 import 'custom_navbar.dart';
@@ -13,8 +14,8 @@ class _NavigatState extends State<Navigat> {
   int currentIndex = 0;
 
   final List<Widget> pages = [
-    Home(userName: 'Abel',),
-    Center(child: Text("Wallet Page")),
+    Home(userName: 'Abel'),
+    WalletPage(),
     Center(child: Text("Transactions Page")),
     Center(child: Text("Analytics Page")),
     Center(child: Text("Profile Page")),
