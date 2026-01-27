@@ -15,7 +15,7 @@ class _NavigatState extends State<Navigat> {
 
   final List<Widget> pages = [
     Home(userName: 'Abel'),
-    WalletPage(),
+    Wallet(),
     Center(child: Text("Transactions Page")),
     Center(child: Text("Analytics Page")),
     Center(child: Text("Profile Page")),
