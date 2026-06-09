@@ -1,9 +1,4 @@
-import 'package:budgettera/sign_in.dart';
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MaterialApp(home: ForgotPasswordScreen()));
-}
 
 // COMMON BUTTON STYLE
 final ButtonStyle primaryButtonStyle = ElevatedButton.styleFrom(

@@ -2,15 +2,24 @@ import 'package:budgettera/forget.dart';
 import 'package:budgettera/navigat.dart';
 import 'package:flutter/material.dart';
 
-// FORM KEY
-final _formKey = GlobalKey<FormState>();
+class SignIn extends StatefulWidget {
+  const SignIn({super.key});
 
-class SignIn extends StatelessWidget {
-  SignIn({super.key});
+  @override
+  State<SignIn> createState() => _SignInState();
+}
 
-  // CONTROLLERS
+class _SignInState extends State<SignIn> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
