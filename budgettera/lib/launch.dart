@@ -11,83 +11,109 @@ class Launch extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [?Colors.blue[900], ?Colors.blue[800], ?Colors.blue[400]],
+            colors: [
+              const Color(0xFF0F2027),
+              const Color(0xFF203A43),
+              const Color(0xFF2C5364),
+            ],
             begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
         child: Padding(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
           child: Column(
-            spacing: 10,
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const Spacer(),
+              // Logo placeholder or animated logo circle
               Center(
-                child: Text(
-                  "Budgetterra",
-                  style: TextStyle(
-                    fontSize: 45,
-                    fontWeight: FontWeight.bold,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.account_balance_wallet,
+                    size: 80,
                     color: Colors.white,
                   ),
                 ),
               ),
-              SizedBox(height: 150),
+              const SizedBox(height: 30),
+              Center(
+                child: const Text(
+                  "Budgetterra",
+                  style: TextStyle(
+                    fontSize: 42,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Center(
+                child: Text(
+                  "Take control of your money, securely.",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white.withOpacity(0.8),
+                    fontWeight: FontWeight.w400,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const Spacer(),
 
-              GestureDetector(
-                onTap: () {
+              ElevatedButton(
+                onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => SignUp()),
                   );
                 },
-                child: LaunchContainer(
-                  authText: "Sign UP",
-                  customColor: Colors.transparent,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF203A43),
+                  elevation: 2,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: const Text(
+                  "Sign Up",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
-              GestureDetector(
-                onTap: () {
+              const SizedBox(height: 15),
+              OutlinedButton(
+                onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => SignIn()),
                   );
                 },
-                child: LaunchContainer(
-                  authText: "Sign In",
-                  customColor: Colors.transparent,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white, width: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: const Text(
+                  "Sign In",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class LaunchContainer extends StatelessWidget {
-  final String authText;
-  final Color customColor;
-  const LaunchContainer({
-    super.key,
-    required this.authText,
-    required this.customColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-      decoration: BoxDecoration(
-        border: BoxBorder.all(width: 2, color: Colors.white),
-        color: customColor,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        authText,
-        style: TextStyle(color: Colors.white),
-        textAlign: TextAlign.center,
       ),
     );
   }

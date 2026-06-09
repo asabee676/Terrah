@@ -1,7 +1,6 @@
 import 'package:budgettera/forget.dart';
 import 'package:budgettera/navigat.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 // FORM KEY
 final _formKey = GlobalKey<FormState>();
@@ -129,22 +128,11 @@ class SignIn extends StatelessWidget {
               GestureDetector(
                 onTap: () async {
                   if (_formKey.currentState!.validate()) {
-                    final supabase = Supabase.instance.client;
-
-                    final email = _emailController.text.trim();
-                    final password = _passwordController.text.trim();
-
                     try {
-                      // LOGIN
-                      await supabase.auth.signInWithPassword(
-                        email: email,
-                        password: password,
-                      );
-
-                      // SUCCESS → GO TO HOME PAGE
+                      // MOCK SUCCESS → GO TO HOME PAGE
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => Navigat()),
+                        MaterialPageRoute(builder: (_) => const Navigat()),
                       );
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(

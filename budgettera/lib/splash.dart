@@ -1,4 +1,5 @@
 import 'package:budgettera/onboarding_screen.dart';
+import 'package:budgettera/navigat.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -13,8 +14,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    // Delay splash for 2 seconds then navigate
-    Future.delayed(const Duration(seconds: 10), () {
+    // Delay splash for 2 seconds then navigate based on session status
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const Onboarding()),

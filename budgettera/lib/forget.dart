@@ -88,20 +88,11 @@ class ForgotPasswordScreen extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context); // back to login
                   },
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignIn()),
-                      );
-                    },
-
-                    child: const Text(
-                      'Login',
-                      style: TextStyle(
-                        color: Color(0xFF0135C5),
-                        fontWeight: FontWeight.bold,
-                      ),
+                  child: const Text(
+                    'Login',
+                    style: TextStyle(
+                      color: Color(0xFF0135C5),
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
