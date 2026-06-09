@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Budgeterra Admin Dashboard</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode">
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="material-icons-round brand-icon">account_balance_wallet</span>
+        <h2>Budgeterra <span class="brand-badge">ADMIN</span></h2>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-section="dashboard">
+          <span class="material-icons-round">dashboard</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-section="users">
+          <span class="material-icons-round">people</span>
+          <span>Users</span>
+        </a>
+        <a href="#" class="nav-item" data-section="transactions">
+          <span class="material-icons-round">receipt_long</span>
+          <span>Transactions</span>
+        </a>
+        <a href="#" class="nav-item" data-section="budgets">
+          <span class="material-icons-round">pie_chart</span>
+          <span>Budgets</span>
+        </a>
+        <a href="#" class="nav-item" data-section="remittances">
+          <span class="material-icons-round">send</span>
+          <span>Remittances</span>
+        </a>
+        <a href="#" class="nav-item" data-section="analytics">
+          <span class="material-icons-round">insights</span>
+          <span>Analytics</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="admin-profile">
+          <div class="avatar">A</div>
+          <div class="admin-info">
+            <h4>Abel Admin</h4>
+            <p>Super Administrator</p>
+          </div>
+        </div>
+        <button id="refresh-all-btn" class="refresh-btn">
+          <span class="material-icons-round">refresh</span>
+          <span>Refresh Data</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="header-left">
+          <h1 id="section-title">Dashboard</h1>
+          <p id="section-subtitle">Real-time platform metrics and financial activity</p>
+        </div>
+        <div class="header-right">
+          <div class="api-status-badge">
+            <span class="status-dot online"></span>
+            <span>API: <strong id="api-status-text">Connecting...</strong></span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard Sections Container -->
+      <div class="sections-wrapper">
+
+        <!-- ================= DASHBOARD SECTION ================= -->
+        <section id="section-dashboard" class="content-section active">
+          <!-- Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-card-icon users-icon">
+                <span class="material-icons-round">people</span>
+              </div>
+              <div class="stat-card-info">
+                <p class="stat-label">Total Users</p>
+                <h3 class="stat-value" id="stats-total-users">0</h3>
+                <span class="stat-trend trend-up"><span class="material-icons-round">trending_up</span> Platform Growth</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-icon transactions-icon">
+                <span class="material-icons-round">swap_horiz</span>
+              </div>
+              <div class="stat-card-info">
+                <p class="stat-label">Total Transactions</p>
+                <h3 class="stat-value" id="stats-total-txs">0</h3>
+                <span class="stat-trend trend-up" id="stats-tx-volume">$0.00 Vol</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-icon income-icon">
+                <span class="material-icons-round">south_west</span>
+              </div>
+              <div class="stat-card-info">
+                <p class="stat-label">Total Income Flow</p>
+                <h3 class="stat-value text-success" id="stats-total-income">$0.00</h3>
+                <span class="stat-trend text-muted" id="stats-avg-balance">Avg Bal: $0.00</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-icon expense-icon">
+                <span class="material-icons-round">north_east</span>
+              </div>
+              <div class="stat-card-info">
+                <p class="stat-label">Total Expense Flow</p>
+                <h3 class="stat-value text-danger" id="stats-total-expense">$0.00</h3>
+                <span class="stat-trend trend-down" id="stats-remit-count">0 Remittances</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Grid: Recent Activity & Distribution -->
+          <div class="dashboard-grid">
+            <!-- Recent Platform Transactions -->
+            <div class="card recent-activity-card">
+              <div class="card-header">
+                <h3>Recent Platform Activity</h3>
+                <span class="card-action-text">Latest 10 events</span>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>User</th>
+                        <th>Transaction</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="dashboard-recent-txs-body">
+                      <tr>
+                        <td colspan="6" class="text-center">Loading transactions...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Platform Highlights Card -->
+            <div class="card highlight-card">
+              <div class="card-header">
+                <h3>System Performance</h3>
+              </div>
+              <div class="card-body">
+                <div class="performance-metrics">
+                  <div class="metric-item">
+                    <div class="metric-header">
+                      <span>Total Fund Reserves</span>
+                      <strong id="perf-reserves">$0.00</strong>
+                    </div>
+                    <div class="progress-bar-container">
+                      <div class="progress-bar-fill" style="width: 100%; background: var(--accent-purple);"></div>
+                    </div>
+                  </div>
+                  <div class="metric-item">
+                    <div class="metric-header">
+                      <span>Remitted Outflow Successful</span>
+                      <strong id="perf-remitted">$0.00</strong>
+                    </div>
+                    <div class="progress-bar-container">
+                      <div class="progress-bar-fill" id="perf-remitted-bar" style="width: 0%; background: var(--accent-blue);"></div>
+                    </div>
+                  </div>
+                  <div class="metric-item">
+                    <div class="metric-header">
+                      <span>Expense to Income Ratio</span>
+                      <strong id="perf-ratio">0%</strong>
+                    </div>
+                    <div class="progress-bar-container">
+                      <div class="progress-bar-fill" id="perf-ratio-bar" style="width: 0%; background: var(--accent-red);"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= USERS SECTION ================= -->
+        <section id="section-users" class="content-section">
+          <div class="card">
+            <div class="card-header flex-header">
+              <div class="header-search">
+                <span class="material-icons-round search-icon">search</span>
+                <input type="text" id="users-search-input" placeholder="Search by name, email, or account number...">
+              </div>
+              <div class="header-actions">
+                <span class="badge badge-purple" id="users-badge-count">0 Users</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Account Number</th>
+                      <th>Balance</th>
+                      <th>Tx Count</th>
+                      <th>Registered</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="users-table-body">
+                    <tr>
+                      <td colspan="8" class="text-center">Loading users...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TRANSACTIONS SECTION ================= -->
+        <section id="section-transactions" class="content-section">
+          <div class="card">
+            <div class="card-header flex-header">
+              <div class="filter-controls">
+                <div class="select-wrapper">
+                  <select id="tx-filter-user">
+                    <option value="">All Users</option>
+                  </select>
+                </div>
+                <div class="select-wrapper">
+                  <select id="tx-filter-type">
+                    <option value="">All Types</option>
+                    <option value="income">Income Only</option>
+                    <option value="expense">Expense Only</option>
+                  </select>
+                </div>
+                <div class="select-wrapper">
+                  <select id="tx-filter-category">
+                    <option value="">All Categories</option>
+                    <option value="Food & Dining">Food & Dining</option>
+                    <option value="Shopping">Shopping</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Bills & Utilities">Bills & Utilities</option>
+                    <option value="Salary">Salary</option>
+                    <option value="Freelance">Freelance</option>
+                    <option value="Transfer">Transfer</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <span class="badge badge-blue" id="txs-badge-count">0 Transactions</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Title</th>
+                      <th>Subtitle</th>
+                      <th>Amount</th>
+                      <th>Category</th>
+                      <th>Account</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="txs-table-body">
+                    <tr>
+                      <td colspan="8" class="text-center">Select user or reload to display transactions...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= BUDGETS SECTION ================= -->
+        <section id="section-budgets" class="content-section">
+          <div class="card">
+            <div class="card-header flex-header">
+              <div class="filter-controls">
+                <div class="select-wrapper">
+                  <select id="budgets-filter-user">
+                    <option value="">Select a user...</option>
+                  </select>
+                </div>
+              </div>
+              <span class="badge badge-orange" id="budgets-badge-count">0 Budgets</span>
+            </div>
+            <div class="card-body">
+              <div class="budgets-grid" id="budgets-container">
+                <div class="no-data-placeholder">
+                  <span class="material-icons-round">pie_chart_outline</span>
+                  <p>Please select a user to view their active budgets and spending limit meters.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= REMITTANCES SECTION ================= -->
+        <section id="section-remittances" class="content-section">
+          <div class="card">
+            <div class="card-header flex-header">
+              <div class="filter-controls">
+                <div class="select-wrapper">
+                  <select id="remit-filter-user">
+                    <option value="">All Users</option>
+                  </select>
+                </div>
+              </div>
+              <span class="badge badge-purple" id="remit-badge-count">0 Remittances</span>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Recipient</th>
+                      <th>Amount</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="remit-table-body">
+                    <tr>
+                      <td colspan="6" class="text-center">Loading remittances...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= ANALYTICS SECTION ================= -->
+        <section id="section-analytics" class="content-section">
+          <div class="analytics-layout">
+            <!-- User Selection for Analytics -->
+            <div class="card analytic-selector-card">
+              <div class="card-header">
+                <h3>Select User to Analyze</h3>
+              </div>
+              <div class="card-body">
+                <div class="select-wrapper width-full">
+                  <select id="analytics-filter-user" style="width: 100%;">
+                    <!-- Populated dynamically -->
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-row">
+              <!-- Spending Trend Line Chart -->
+              <div class="card chart-card">
+                <div class="card-header flex-header">
+                  <h3>Financial Trends</h3>
+                  <div class="period-toggle">
+                    <button class="toggle-btn active" data-period="week">Week</button>
+                    <button class="toggle-btn" data-period="month">Month</button>
+                    <button class="toggle-btn" data-period="year">Year</button>
+                  </div>
+                </div>
+                <div class="card-body chart-container">
+                  <canvas id="trendChart"></canvas>
+                </div>
+              </div>
+
+              <!-- Category Distribution Pie Chart -->
+              <div class="card chart-card-doughnut">
+                <div class="card-header">
+                  <h3>Expense Distribution</h3>
+                </div>
+                <div class="card-body chart-container flex-chart">
+                  <div class="doughnut-wrapper">
+                    <canvas id="categoryChart"></canvas>
+                  </div>
+                  <div class="chart-legend" id="category-legend">
+                    <!-- Loaded dynamically -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Javascript -->
+  <script src="app.js"></script>
+</body>
+</html>
