@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:budgettera/send_money_screen.dart';
 
 class Home extends StatelessWidget {
   final String userName;
@@ -122,7 +123,7 @@ class Home extends StatelessWidget {
                                   Container(
                                     padding: const EdgeInsets.all(2),
                                     decoration: BoxDecoration(
-                                      color: successGreen.withOpacity(0.2),
+                                      color: successGreen.withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: const Icon(Icons.arrow_upward, color: successGreen, size: 12),
@@ -143,7 +144,7 @@ class Home extends StatelessWidget {
                         Container(
                           height: 40,
                           width: 1,
-                          color: Colors.green.withOpacity(0.2),
+                          color: Colors.green.withValues(alpha: 0.2),
                         ),
                         const SizedBox(width: 15),
                         // Right: Expense
@@ -156,7 +157,7 @@ class Home extends StatelessWidget {
                                   Container(
                                     padding: const EdgeInsets.all(2),
                                     decoration: BoxDecoration(
-                                      color: failRed.withOpacity(0.2),
+                                      color: failRed.withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: const Icon(Icons.arrow_downward, color: failRed, size: 12),
@@ -218,27 +219,37 @@ class Home extends StatelessWidget {
                     const SizedBox(height: 15),
 
                     // ACTION BUTTONS
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        _actionButton(
-                          icon: Icons.account_balance_wallet_outlined,
-                          text: "Desposit",
-                        ),
-                        _actionButton(
-                          icon: Icons.local_atm_outlined,
-                          text: "withdraw\nmoney",
-                        ),
-                        _actionButton(
-                          icon: Icons.send_outlined,
-                          text: "Send\nMoney",
-                        ),
-                        _actionButton(
-                          icon: Icons.request_quote_outlined,
-                          text: "Pay Bills",
-                        ),
-                      ],
+                    Builder(
+                      builder: (ctx) => Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const _actionButton(
+                            icon: Icons.account_balance_wallet_outlined,
+                            text: "Deposit",
+                          ),
+                          const _actionButton(
+                            icon: Icons.local_atm_outlined,
+                            text: "Withdraw",
+                          ),
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                              ctx,
+                              MaterialPageRoute(
+                                builder: (_) => const SendMoneyScreen(),
+                              ),
+                            ),
+                            child: const _actionButton(
+                              icon: Icons.send_outlined,
+                              text: "Send\nMoney",
+                            ),
+                          ),
+                          const _actionButton(
+                            icon: Icons.request_quote_outlined,
+                            text: "Pay Bills",
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -369,8 +380,7 @@ class _actionButton extends StatelessWidget {
 // REMITTANCE TABLE
 // ============================================================================
 Widget _remittanceTable() {
-  const primaryBlue = Color(0xFF0A6CFF);
-  
+
   return Table(
     columnWidths: const {
       0: FlexColumnWidth(1.2),

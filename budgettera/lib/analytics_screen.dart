@@ -1,4 +1,13 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+
+// ── Design tokens ───────────────────────────────────────────────
+const _kDominant = Color(0xFF007AFF);
+const _kComplementary = Color(0xFF00238E);
+const _kOffWhite = Color(0xFFE6F4F1);
+const _kLightGreen = Color(0xFFDFF7E2);
+const _kGreen = Color(0xFF7ED321);
+const _kRed = Color(0xFFED251A);
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -8,430 +17,667 @@ class AnalyticsScreen extends StatefulWidget {
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
-  String _selectedPeriod = "Week"; // "Week", "Month", "Year"
+  // 0 = Daily, 1 = Weekly, 2 = Monthly
+  int _selectedTab = 0;
 
-  // Weekly data
-  final List<double> _weeklyExpenses = [240, 150, 480, 90, 310, 600, 180];
-  final List<String> _weeklyDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-  // Monthly data
-  final List<double> _monthlyExpenses = [1200, 1800, 950, 2200];
-  final List<String> _monthlyWeeks = ["Week 1", "Week 2", "Week 3", "Week 4"];
-
-  // Category breakdown data
-  final List<Map<String, dynamic>> _categories = [
-    {
-      "name": "Food & Dining",
-      "percent": 35,
-      "amount": "GHS 480.00",
-      "icon": Icons.fastfood,
-      "color": const Color(0xFFFF8008),
-    },
-    {
-      "name": "Shopping",
-      "percent": 25,
-      "amount": "GHS 342.90",
-      "icon": Icons.shopping_bag,
-      "color": const Color(0xFF00C9FF),
-    },
-    {
-      "name": "Entertainment",
-      "percent": 22,
-      "amount": "GHS 300.00",
-      "icon": Icons.movie,
-      "color": const Color(0xFFFF416C),
-    },
-    {
-      "name": "Transport",
-      "percent": 18,
-      "amount": "GHS 246.80",
-      "icon": Icons.directions_car,
-      "color": const Color(0xFF11998E),
-    },
+  // Paired [income, expense] per bar (in thousands)
+  static const List<List<double>> _dailyData = [
+    [47, 17], // Mon
+    [90, 56], // Tue
+    [50, 83], // Wed
+    [73, 32], // Thu
+    [65, 10], // Fri
+    [10, 30], // Sat
+    [30, 50], // Sun  — matches Figma heights roughly
   ];
+  static const List<String> _dailyLabels = [
+    'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
+  ];
+
+  static const List<List<double>> _weeklyData = [
+    [80, 40], [60, 70], [90, 30], [50, 60],
+  ];
+  static const List<String> _weeklyLabels = [
+    'Wk 1', 'Wk 2', 'Wk 3', 'Wk 4'
+  ];
+
+  static const List<List<double>> _monthlyData = [
+    [70, 50], [85, 60], [60, 40], [90, 70],
+    [75, 55], [80, 65], [65, 45], [70, 80],
+    [88, 52], [60, 30], [78, 68], [90, 40],
+  ];
+  static const List<String> _monthlyLabels = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  List<List<double>> get _chartData =>
+      [_dailyData, _weeklyData, _monthlyData][_selectedTab];
+  List<String> get _chartLabels =>
+      [_dailyLabels, _weeklyLabels, _monthlyLabels][_selectedTab];
+
+  final List<String> _tabs = ['Daily', 'Weekly', 'Monthly'];
+
+  // Summary figures
+  static const String _totalBalance = 'GHS 2,884.00';
+  static const String _totalExpense = 'GHS 1,187.40';
 
   @override
   Widget build(BuildContext context) {
-    const primaryBlue = Color(0xFF0A6CFF);
-    const successGreen = Color(0xFF3CC173);
-    const failRed = Color(0xFFFF4D4D);
-
-    // Determine current chart data
-    final chartValues = _selectedPeriod == "Week" ? _weeklyExpenses : _monthlyExpenses;
-    final chartLabels = _selectedPeriod == "Week" ? _weeklyDays : _monthlyWeeks;
-    final double maxVal = chartValues.fold(1.0, (prev, element) => element > prev ? element : prev);
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8FF),
-      appBar: AppBar(
-        title: const Text(
-          "Analytics",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        backgroundColor: primaryBlue,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Period Selector Toggle
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(15),
+      backgroundColor: _kDominant,
+      body: Column(
+        children: [
+          // ── Blue top section ──────────────────────────────────
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Analytics',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                        Icons.calendar_today_outlined,
+                        color: Colors.white,
+                        size: 18),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ── White card panel ──────────────────────────────────
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(50),
+                  topRight: Radius.circular(50),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _periodButton("Week"),
-                    _periodButton("Month"),
-                    _periodButton("Year"),
+                    // ── Period switcher ─────────────────────────
+                    _PeriodSwitcher(
+                      tabs: _tabs,
+                      selected: _selectedTab,
+                      onChanged: (i) => setState(() => _selectedTab = i),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    // ── Income & Expenses bar chart ─────────────
+                    _ChartCard(
+                      data: _chartData,
+                      labels: _chartLabels,
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // ── Balance / Expense summary ───────────────
+                    _SummaryRow(
+                      balance: _totalBalance,
+                      expense: _totalExpense,
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // ── Date range label ────────────────────────
+                    const Center(
+                      child: Text(
+                        'Mon Nov 1, 2024 – Sun Nov 7, 2024',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 15,
+                          color: _kComplementary,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // ── Income & Expense donut cards ────────────
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _DonutCard(
+                            label: 'Income',
+                            percent: 50,
+                            color: _kDominant,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: _DonutCard(
+                            label: 'Expenses',
+                            percent: 50,
+                            color: _kDominant,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 25),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-            // Chart Card Container
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Total Spending",
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _selectedPeriod == "Week" ? "GHS 2,050.00" : "GHS 6,150.00",
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFF1E2843),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: successGreen.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.arrow_downward, size: 14, color: successGreen),
-                            SizedBox(width: 4),
-                            Text(
-                              "12.4%",
-                              style: TextStyle(
-                                color: successGreen,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
+// ================================================================
+// PERIOD SWITCHER  (#DFF7E2 bg, active = #007AFF)
+// ================================================================
+class _PeriodSwitcher extends StatelessWidget {
+  final List<String> tabs;
+  final int selected;
+  final ValueChanged<int> onChanged;
 
-                  // The Interactive Bar Chart
-                  SizedBox(
-                    height: 180,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: List.generate(chartValues.length, (idx) {
-                        double normalizedHeight = (chartValues[idx] / maxVal) * 140;
-                        if (normalizedHeight < 15) normalizedHeight = 15;
+  const _PeriodSwitcher({
+    required this.tabs,
+    required this.selected,
+    required this.onChanged,
+  });
 
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              "GHS ${chartValues[idx].toInt()}",
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Colors.grey.shade500,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Container(
-                              width: _selectedPeriod == "Week" ? 22 : 40,
-                              height: normalizedHeight,
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xFF00C6FF), primaryBlue],
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              chartLabels[idx],
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1E2843),
-                              ),
-                            ),
-                          ],
-                        );
-                      }),
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: _kLightGreen,
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Row(
+        children: List.generate(tabs.length, (i) {
+          final isActive = i == selected;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => onChanged(i),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: isActive ? _kDominant : Colors.transparent,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Center(
+                  child: Text(
+                    tabs[i],
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: isActive ? Colors.white : _kComplementary,
                     ),
                   ),
-                ],
+                ),
               ),
             ),
+          );
+        }),
+      ),
+    );
+  }
+}
 
-            const SizedBox(height: 25),
+// ================================================================
+// INCOME & EXPENSES BAR CHART CARD
+// ================================================================
+class _ChartCard extends StatelessWidget {
+  final List<List<double>> data; // [[income, expense], ...]
+  final List<String> labels;
 
-            // Income / Expense summary Row
-            Row(
+  const _ChartCard({required this.data, required this.labels});
+
+  @override
+  Widget build(BuildContext context) {
+    const maxH = 101.0; // max bar height in logical pixels
+
+    // y-axis ticks
+    const yTicks = ['15k', '10k', '5k', '1k'];
+    const yValues = [15000.0, 10000.0, 5000.0, 1000.0];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _kOffWhite,
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // title
+          const Text(
+            'Income & Expenses',
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              color: _kComplementary,
+            ),
+          ),
+          const SizedBox(height: 6),
+
+          // legend
+          Row(
+            children: [
+              _legendDot(_kGreen),
+              const SizedBox(width: 4),
+              const Text('Income',
+                  style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12,
+                      color: _kComplementary)),
+              const SizedBox(width: 10),
+              _legendDot(_kRed),
+              const SizedBox(width: 4),
+              const Text('Expenses',
+                  style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12,
+                      color: _kComplementary)),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // Chart area: y-axis + bars
+          SizedBox(
+            height: maxH + 30, // bars + x labels
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Expanded(
-                  child: _statSummaryCard(
-                    title: "Income",
-                    amount: "GHS 7,500.00",
-                    color: successGreen,
-                    icon: Icons.arrow_upward,
-                  ),
+                // Y-axis labels
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: yTicks
+                      .map((t) => Text(
+                            t,
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 11,
+                              color: _kDominant,
+                            ),
+                          ))
+                      .toList(),
                 ),
-                const SizedBox(width: 15),
+                const SizedBox(width: 8),
+
+                // Bars area
                 Expanded(
-                  child: _statSummaryCard(
-                    title: "Expenses",
-                    amount: "GHS 2,050.00",
-                    color: failRed,
-                    icon: Icons.arrow_downward,
+                  child: Column(
+                    children: [
+                      // dashed grid lines + bars stacked
+                      Expanded(
+                        child: Stack(
+                          children: [
+                            // dashed horizontal lines at each y tick
+                            ...List.generate(yValues.length, (i) {
+                              final frac =
+                                  1.0 - (yValues[i] / yValues.first);
+                              return Positioned(
+                                top: frac * maxH,
+                                left: 0,
+                                right: 0,
+                                child: CustomPaint(
+                                  painter: _DashedLinePainter(),
+                                  child: const SizedBox(height: 1),
+                                ),
+                              );
+                            }),
+
+                            // Bar groups
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceEvenly,
+                              children: List.generate(data.length, (i) {
+                                final income = data[i][0];
+                                final expense = data[i][1];
+                                final maxVal = 101.0;
+                                final incH = (income / maxVal) * maxH;
+                                final expH = (expense / maxVal) * maxH;
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        // expense bar (red, left)
+                                        Container(
+                                          width: 5,
+                                          height: expH.clamp(4.0, maxH),
+                                          decoration: BoxDecoration(
+                                            color: _kRed,
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 3),
+                                        // income bar (green, right)
+                                        Container(
+                                          width: 5,
+                                          height: incH.clamp(4.0, maxH),
+                                          decoration: BoxDecoration(
+                                            color: _kGreen,
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // X-axis baseline
+                      Container(
+                        height: 1,
+                        color: _kComplementary,
+                      ),
+
+                      // X-axis labels
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: labels
+                            .map((l) => Text(
+                                  l,
+                                  style: const TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 11,
+                                    color: _kComplementary,
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-
-            const SizedBox(height: 30),
-
-            const Text(
-              "Expense Breakdown",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E2843),
-              ),
-            ),
-            const SizedBox(height: 15),
-
-            // Categories list
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _categories.length,
-              itemBuilder: (context, index) {
-                final cat = _categories[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.02),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: cat["color"].withOpacity(0.12),
-                        child: Icon(cat["icon"], color: cat["color"]),
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  cat["name"],
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                    color: Color(0xFF1E2843),
-                                  ),
-                                ),
-                                Text(
-                                  cat["amount"],
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 15,
-                                    color: Color(0xFF1E2843),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Stack(
-                              children: [
-                                Container(
-                                  height: 6,
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade100,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                                FractionallySizedBox(
-                                  widthFactor: cat["percent"] / 100,
-                                  child: Container(
-                                    height: 6,
-                                    decoration: BoxDecoration(
-                                      color: cat["color"],
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 15),
-                      Text(
-                        "${cat["percent"]}%",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade700,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _periodButton(String period) {
-    final bool isSelected = _selectedPeriod == period;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedPeriod = period;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Text(
-          period,
-          style: TextStyle(
-            color: isSelected ? const Color(0xFF0A6CFF) : Colors.grey.shade600,
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _statSummaryCard({
-    required String title,
-    required String amount,
-    required Color color,
-    required IconData icon,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _legendDot(Color color) => Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
+      );
+}
+
+// dashed line painter
+class _DashedLinePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = _kDominant.withValues(alpha: 0.4)
+      ..strokeWidth = 0.6
+      ..style = PaintingStyle.stroke;
+
+    const dashW = 6.0;
+    const gapW = 4.0;
+    double x = 0;
+    while (x < size.width) {
+      canvas.drawLine(Offset(x, 0), Offset(x + dashW, 0), paint);
+      x += dashW + gapW;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ================================================================
+// SUMMARY ROW (Total Balance | Total Expense)
+// ================================================================
+class _SummaryRow extends StatelessWidget {
+  final String balance;
+  final String expense;
+  const _SummaryRow({required this.balance, required this.expense});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: _kOffWhite,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundColor: color.withOpacity(0.12),
-            radius: 20,
-            child: Icon(icon, color: color, size: 18),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                amount,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E2843),
+          // Balance
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 15,
+                      height: 17,
+                      decoration: BoxDecoration(
+                        color: _kDominant,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: const Icon(Icons.arrow_upward,
+                          size: 11, color: Colors.white),
+                    ),
+                    const SizedBox(width: 6),
+                    const Text('Total Balance',
+                        style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 13,
+                            color: Colors.black87)),
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  balance,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: _kDominant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Divider
+          Container(
+            height: 40,
+            width: 1,
+            color: const Color(0xFF8E8E93).withValues(alpha: 0.4),
+          ),
+          const SizedBox(width: 16),
+
+          // Expense
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 15,
+                      height: 17,
+                      decoration: BoxDecoration(
+                        color: _kRed,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: const Icon(Icons.arrow_downward,
+                          size: 11, color: Colors.white),
+                    ),
+                    const SizedBox(width: 6),
+                    const Text('Total Expense',
+                        style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 13,
+                            color: Colors.black87)),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  expense,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: _kRed,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+// ================================================================
+// DONUT CARD  (blue square with circular arc)
+// ================================================================
+class _DonutCard extends StatelessWidget {
+  final String label;
+  final double percent; // 0–100
+  final Color color;
+
+  const _DonutCard({
+    required this.label,
+    required this.percent,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 167,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Outer white ring (background)
+          CustomPaint(
+            painter: _ArcPainter(
+              fraction: 1.0,
+              color: Colors.white.withValues(alpha: 0.3),
+              strokeWidth: 10,
+            ),
+            child: const SizedBox(width: 100, height: 100),
+          ),
+          // Inner navy arc (progress)
+          CustomPaint(
+            painter: _ArcPainter(
+              fraction: percent / 100,
+              color: _kComplementary,
+              strokeWidth: 10,
+            ),
+            child: const SizedBox(width: 100, height: 100),
+          ),
+          // Percentage text
+          Text(
+            '${percent.toInt()}%',
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+
+          // Label at the bottom
+          Positioned(
+            bottom: 18,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: _kOffWhite,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ArcPainter extends CustomPainter {
+  final double fraction;
+  final Color color;
+  final double strokeWidth;
+
+  const _ArcPainter({
+    required this.fraction,
+    required this.color,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    final rect = Rect.fromLTWH(
+        strokeWidth / 2,
+        strokeWidth / 2,
+        size.width - strokeWidth,
+        size.height - strokeWidth);
+
+    canvas.drawArc(
+      rect,
+      -math.pi / 2, // start from top
+      fraction * 2 * math.pi,
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ArcPainter old) =>
+      old.fraction != fraction || old.color != color;
 }
