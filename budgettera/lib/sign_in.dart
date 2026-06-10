@@ -3,6 +3,7 @@ import 'package:budgeterra/navigat.dart';
 import 'package:budgeterra/sign_up.dart';
 import 'package:flutter/material.dart';
 
+<<<<<<< HEAD
 // ── Design tokens ──────────────────────────────────────────────
 const _kDominant = Color(0xFF007AFF);
 const _kComplementary = Color(0xFF00238E);
@@ -44,6 +45,26 @@ class _SignInState extends State<SignIn> {
       context,
       MaterialPageRoute(builder: (_) => const Navigat()),
     );
+  }
+=======
+class SignIn extends StatefulWidget {
+  const SignIn({super.key});
+
+  @override
+  State<SignIn> createState() => _SignInState();
+}
+
+class _SignInState extends State<SignIn> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+>>>>>>> 1c31f12f15c20b0ae7a9feb005f30f68ebbe7d3a
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
